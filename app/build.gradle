@@ -1,0 +1,44 @@
+plugins {
+    id "com.android.application"
+}
+
+def releaseKeystore = rootProject.file("keystore/deckhand-release.jks")
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file("keystore/keystore.properties")
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
+android {
+    namespace "app.deckhand.dv3050"
+    compileSdk 34
+    defaultConfig {
+        applicationId "app.deckhand.dv3050"
+        minSdk 31
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+    }
+    signingConfigs {
+        release {
+            if (releaseKeystore.exists() && keystorePropsFile.exists()) {
+                storeFile releaseKeystore
+                storePassword keystoreProps.getProperty("storePassword")
+                keyAlias keystoreProps.getProperty("keyAlias")
+                keyPassword keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (releaseKeystore.exists() && keystorePropsFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
